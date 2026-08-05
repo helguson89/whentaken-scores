@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WhenTaken Scores
 
-## Getting Started
+Del og sammenlign daglige [WhenTaken](https://whentaken.com/)-resultater med venner. Lim inn delingsteksten fra spillet i stedet for å sende den i Messenger, så vises den automatisk i et delt leaderboard.
 
-First, run the development server:
+## Funksjoner
+
+- **I dag** — leaderboard for siste runde som er lagt inn
+- **Legg til** — lim inn delingsteksten fra WhenTaken, se en forhåndsvisning, og lagre
+- **Statistikk** — snittscore, beste score, antall spilte runder og seire per spiller
+- **Historikk** — se alle tidligere runder og resultatene for hver av dem
+
+Det er **ingen innlogging eller grupper** — alle med lenken til appen deler samme leaderboard og kan legge inn resultat under hvilket som helst navn. Dette er en bevisst forenkling for en liten vennegjeng; se sikkerhetsnotatet nederst hvis dere vokser ut av det.
+
+## Oppsett
+
+### 1. Opprett et gratis Supabase-prosjekt
+
+1. Gå til [supabase.com](https://supabase.com/) og opprett et nytt prosjekt (gratis tier er nok).
+2. Åpne **SQL Editor** i prosjektet og kjør innholdet i [`supabase/schema.sql`](supabase/schema.sql). Dette oppretter `scores`-tabellen og tilgangsreglene.
+3. Gå til **Project Settings → API** og noter:
+   - **Project URL**
+   - **anon public key**
+
+### 2. Sett opp miljøvariabler lokalt
+
+Kopier `.env.local.example` til `.env.local` og fyll inn verdiene fra Supabase:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.local.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```
+SUPABASE_URL=https://ditt-prosjekt.supabase.co
+SUPABASE_ANON_KEY=din-anon-key
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Kjør appen lokalt
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+Åpne [http://localhost:3000](http://localhost:3000).
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Deploy til Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Push repoet til GitHub.
+2. Importer prosjektet på [vercel.com/new](https://vercel.com/new).
+3. Legg inn `SUPABASE_URL` og `SUPABASE_ANON_KEY` som miljøvariabler i Vercel-prosjektet (samme verdier som i `.env.local`).
+4. Deploy — del lenken med vennene dine.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Slik lager du en delingstekst i WhenTaken
 
-## Deploy on Vercel
+Etter en runde velger du "Del", og limer hele teksten inn i **Legg til**-siden i appen, f.eks.:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+#WhenTaken #878 (24.07.2026)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+I scored 818/1000🏅
+
+1️⃣📍744 km - 🗓️9 yrs - 🥈165/200
+2️⃣📍516 m - 🗓️11 yrs - 🥇182/200
+3️⃣📍8.0K km - 🗓️5 yrs - 🥉103/200
+4️⃣📍611 km - 🗓️8 yrs - 🥈171/200
+5️⃣📍1.6 km - 🗓️3 yrs - 🥇197/200
+ https://whentaken.com/
+```
+
+Appen tolker rundenummer, dato, totalscore og hver enkelt rundes distanse/år/medalje/poeng.
+
+## Sikkerhetsnotat
+
+Databasen har åpne tilgangsregler (Row Level Security tillater alle å lese, legge til og oppdatere rader). Det finnes ingen autentisering, så hvem som helst med lenken kan i teorien legge inn score under et annet navn enn sitt eget. Dette er en akseptert avveining for en liten, tillitsbasert vennegjeng. Hvis appen skal brukes av en større eller mindre tillitsfull gruppe, bør dere legge til ekte innlogging (f.eks. Supabase Auth) og stramme inn policyene i [`supabase/schema.sql`](supabase/schema.sql).
+
+## Tech stack
+
+- [Next.js](https://nextjs.org) (App Router, Server Actions)
+- [Tailwind CSS](https://tailwindcss.com)
+- [Supabase](https://supabase.com) (Postgres + RLS, ingen egen backend nødvendig)
+
+## Tester
+
+Parseren for delingsteksten har enhetstester:
+
+```bash
+npx vitest run
+```
