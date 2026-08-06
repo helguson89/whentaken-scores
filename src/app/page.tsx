@@ -1,14 +1,10 @@
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
+import { ScoreCard } from "@/components/ScoreCard";
+import { CommentThread } from "@/components/CommentThread";
+import type { CommentRow, ReactionRow, ScoreRow } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-
-function medalFor(position: number): string {
-  if (position === 0) return "🥇";
-  if (position === 1) return "🥈";
-  if (position === 2) return "🥉";
-  return `${position + 1}.`;
-}
 
 export default async function HomePage() {
   const { data: latestRow } = await supabase
@@ -20,14 +16,14 @@ export default async function HomePage() {
 
   if (!latestRow) {
     return (
-      <main className="mx-auto max-w-md p-4 space-y-4">
+      <main className="mx-auto max-w-md space-y-4 p-4">
         <h1 className="text-xl font-semibold">Ingen resultater ennå</h1>
-        <p className="text-gray-600">
+        <p className="text-ink-light">
           Vær den første til å legge inn dagens WhenTaken-resultat.
         </p>
         <Link
           href="/add"
-          className="inline-block rounded bg-black text-white px-4 py-2 font-medium"
+          className="inline-block rounded-full bg-coral px-5 py-2.5 font-semibold text-white shadow-sm"
         >
           Legg til resultat
         </Link>
@@ -35,42 +31,69 @@ export default async function HomePage() {
     );
   }
 
-  const { data: rows } = await supabase
-    .from("scores")
-    .select("player_name, total_score, total_max")
-    .eq("puzzle_number", latestRow.puzzle_number)
-    .order("total_score", { ascending: false });
+  const puzzleNumber = latestRow.puzzle_number;
+
+  const [{ data: rows }, { data: comments }] = await Promise.all([
+    supabase
+      .from("scores")
+      .select("id, player_name, total_score, total_max, rounds")
+      .eq("puzzle_number", puzzleNumber)
+      .order("total_score", { ascending: false }),
+    supabase
+      .from("comments")
+      .select("id, puzzle_number, player_name, message, created_at")
+      .eq("puzzle_number", puzzleNumber)
+      .order("created_at", { ascending: true }),
+  ]);
+
+  const scores = (rows ?? []) as unknown as ScoreRow[];
+  const scoreIds = scores.map((s) => s.id);
+
+  const { data: reactionRows } =
+    scoreIds.length > 0
+      ? await supabase.from("reactions").select("*").in("score_id", scoreIds)
+      : { data: [] as ReactionRow[] };
+
+  const reactionsByScore = new Map<string, ReactionRow[]>();
+  for (const reaction of (reactionRows ?? []) as ReactionRow[]) {
+    const list = reactionsByScore.get(reaction.score_id) ?? [];
+    list.push(reaction);
+    reactionsByScore.set(reaction.score_id, list);
+  }
 
   return (
-    <main className="mx-auto max-w-md p-4 space-y-4">
+    <main className="mx-auto max-w-md space-y-4 p-4">
       <div>
         <h1 className="text-xl font-semibold">
-          Dagens resultat — runde #{latestRow.puzzle_number}
+          Dagens resultat — runde #{puzzleNumber}
         </h1>
-        <p className="text-sm text-gray-500">{latestRow.puzzle_date}</p>
+        <p className="text-sm text-ink-light">{latestRow.puzzle_date}</p>
       </div>
-      <ol className="space-y-2">
-        {(rows ?? []).map((row, i) => (
-          <li
-            key={row.player_name}
-            className="flex items-center justify-between rounded border px-3 py-2"
-          >
-            <span>
-              <span className="inline-block w-7">{medalFor(i)}</span>
-              {row.player_name}
-            </span>
-            <span className="font-medium">
-              {row.total_score}/{row.total_max}
-            </span>
-          </li>
+
+      <div className="space-y-2">
+        {scores.map((score, i) => (
+          <ScoreCard
+            key={score.id}
+            score={score}
+            position={i}
+            reactions={reactionsByScore.get(score.id) ?? []}
+            path="/"
+          />
         ))}
-      </ol>
+      </div>
+
       <Link
         href="/add"
-        className="inline-block rounded bg-black text-white px-4 py-2 font-medium"
+        className="inline-block rounded-full bg-coral px-5 py-2.5 font-semibold text-white shadow-sm"
       >
         Legg til ditt resultat
       </Link>
+
+      <CommentThread
+        puzzleNumber={puzzleNumber}
+        comments={(comments ?? []) as CommentRow[]}
+        path="/"
+      />
     </main>
   );
 }

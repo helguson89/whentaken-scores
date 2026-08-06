@@ -17,18 +17,20 @@ export default async function HistoryPage() {
   }
 
   return (
-    <main className="mx-auto max-w-md p-4 space-y-4">
+    <main className="mx-auto max-w-md space-y-4 p-4">
       <h1 className="text-xl font-semibold">Tidligere runder</h1>
-      {puzzles.size === 0 && <p className="text-gray-600">Ingen resultater ennå.</p>}
+      {puzzles.size === 0 && (
+        <p className="text-ink-light">Ingen resultater ennå.</p>
+      )}
       <ul className="space-y-2">
         {[...puzzles.entries()].map(([puzzleNumber, date]) => (
           <li key={puzzleNumber}>
             <Link
               href={`/history/${puzzleNumber}`}
-              className="flex justify-between rounded border px-3 py-2 hover:bg-gray-50"
+              className="card flex items-center justify-between px-4 py-3 hover:bg-peach"
             >
-              <span>Runde #{puzzleNumber}</span>
-              <span className="text-gray-500">{date}</span>
+              <span className="font-semibold">Runde #{puzzleNumber}</span>
+              <span className="text-sm text-ink-light">{date}</span>
             </Link>
           </li>
         ))}

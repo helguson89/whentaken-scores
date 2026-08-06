@@ -4,10 +4,11 @@ Del og sammenlign daglige [WhenTaken](https://whentaken.com/)-resultater med ven
 
 ## Funksjoner
 
-- **I dag** — leaderboard for siste runde som er lagt inn
-- **Legg til** — lim inn delingsteksten fra WhenTaken, se en forhåndsvisning, og lagre
-- **Statistikk** — snittscore, beste score, antall spilte runder og seire per spiller
-- **Historikk** — se alle tidligere runder og resultatene for hver av dem
+- **I dag** — leaderboard for siste runde som er lagt inn, med chat under dagens resultater
+- **Legg til** — lim inn delingsteksten fra WhenTaken, se en forhåndsvisning, og lagre. Konfetti ved personlig rekord, og en egen fyrverkeri-animasjon når du setter dagens beste resultat
+- **Statistikk** — snittscore, beste score, antall spilte runder og seire per spiller, kategori-toppen (best avstand, best år, mest konsistent) og en trendgraf over tid
+- **Historikk** — se alle tidligere runder og resultatene for hver av dem, med egen kommentartråd per runde
+- **Utvid en score** — trykk på et resultat for å se poengene per spørsmål (avstand, år, medalje), og reager med emoji på andres resultater
 
 Det er **ingen innlogging eller grupper** — alle med lenken til appen deler samme leaderboard og kan legge inn resultat under hvilket som helst navn. Dette er en bevisst forenkling for en liten vennegjeng; se sikkerhetsnotatet nederst hvis dere vokser ut av det.
 
@@ -16,10 +17,12 @@ Det er **ingen innlogging eller grupper** — alle med lenken til appen deler sa
 ### 1. Opprett et gratis Supabase-prosjekt
 
 1. Gå til [supabase.com](https://supabase.com/) og opprett et nytt prosjekt (gratis tier er nok).
-2. Åpne **SQL Editor** i prosjektet og kjør innholdet i [`supabase/schema.sql`](supabase/schema.sql). Dette oppretter `scores`-tabellen og tilgangsreglene.
+2. Åpne **SQL Editor** i prosjektet og kjør innholdet i [`supabase/schema.sql`](supabase/schema.sql). Dette oppretter `scores`-, `comments`- og `reactions`-tabellene med tilgangsreglene.
 3. Gå til **Project Settings → API** og noter:
    - **Project URL**
    - **anon public key**
+
+> **Har du allerede kjørt en eldre versjon av `schema.sql`?** Da har databasen din bare `scores`-tabellen. Kjør migrasjonen [`supabase/migrations/0002_comments_and_reactions.sql`](supabase/migrations/0002_comments_and_reactions.sql) i SQL Editor for å legge til `comments`- og `reactions`-tabellene som chat, kommentarer og reaksjoner trenger. Ikke kjør hele `schema.sql` på nytt — `CREATE POLICY` feiler hvis policyene allerede finnes.
 
 ### 2. Sett opp miljøvariabler lokalt
 
@@ -78,6 +81,8 @@ Databasen har åpne tilgangsregler (Row Level Security tillater alle å lese, le
 - [Next.js](https://nextjs.org) (App Router, Server Actions)
 - [Tailwind CSS](https://tailwindcss.com)
 - [Supabase](https://supabase.com) (Postgres + RLS, ingen egen backend nødvendig)
+- [Recharts](https://recharts.org) (trendgraf i statistikken)
+- [canvas-confetti](https://www.kirilv.com/canvas-confetti/) (feiring ved personlig rekord / dagens beste)
 
 ## Tester
 

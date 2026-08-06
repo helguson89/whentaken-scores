@@ -1,16 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fredoka } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const fredoka = Fredoka({
+  variable: "--font-fredoka",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -19,33 +15,31 @@ export const metadata: Metadata = {
 };
 
 const NAV_LINKS = [
-  { href: "/", label: "I dag" },
-  { href: "/add", label: "Legg til" },
-  { href: "/stats", label: "Statistikk" },
-  { href: "/history", label: "Historikk" },
+  { href: "/", label: "I dag", icon: "☀️" },
+  { href: "/add", label: "Legg til", icon: "➕" },
+  { href: "/stats", label: "Statistikk", icon: "📊" },
+  { href: "/history", label: "Historikk", icon: "🗓️" },
 ];
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="no"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-white text-gray-900">
-        <nav className="border-b sticky top-0 bg-white z-10">
-          <div className="mx-auto flex max-w-md items-center justify-between px-4 py-3 text-sm font-medium">
+    <html lang="no" className={`${fredoka.variable} h-full antialiased`}>
+      <body className="bg-app-gradient flex min-h-full flex-col text-ink">
+        <div className="flex-1 pb-24">{children}</div>
+        <nav className="fixed inset-x-0 bottom-0 border-t border-peach-dark bg-cream/95 backdrop-blur">
+          <div className="mx-auto flex max-w-md items-center justify-between px-4 py-2">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="hover:text-gray-500"
+                className="flex flex-1 flex-col items-center gap-0.5 rounded-2xl py-1.5 text-xs font-medium text-ink-light hover:bg-peach hover:text-ink"
               >
+                <span className="text-xl">{link.icon}</span>
                 {link.label}
               </Link>
             ))}
           </div>
         </nav>
-        <div className="flex-1">{children}</div>
       </body>
     </html>
   );
