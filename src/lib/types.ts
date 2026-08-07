@@ -33,4 +33,21 @@ export type ReactionSummary = {
   reactedByMe: boolean;
 };
 
+export type PushSubscriptionRow = {
+  id: string;
+  player_name: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  created_at: string;
+};
+
+export type PushSubscriptionJSON = {
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+};
+
 export const REACTION_EMOJIS = ["👏", "🔥", "😂", "😱", "💀"] as const;

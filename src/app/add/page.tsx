@@ -80,6 +80,16 @@ export default function AddScorePage() {
     <main className="mx-auto max-w-md space-y-4 p-4">
       <h1 className="text-xl font-semibold">Legg til dagens resultat</h1>
 
+      <a
+        href="https://whentaken.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="card flex items-center justify-between px-4 py-3 hover:bg-peach"
+      >
+        <span className="font-semibold">🎮 Spill dagens WhenTaken</span>
+        <span className="text-ink-light">→</span>
+      </a>
+
       <form action={formAction} className="card space-y-4 p-4">
         <div>
           <label

@@ -1,8 +1,83 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import webpush from "web-push";
 import { supabase } from "./supabaseClient";
 import { parseWhenTakenShare } from "./parseShare";
+import type { PushSubscriptionJSON } from "./types";
+
+const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+const vapidSubject = process.env.VAPID_SUBJECT;
+
+if (vapidPublicKey && vapidPrivateKey && vapidSubject) {
+  webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+}
+
+async function notifySubscribers({
+  excludePlayerName,
+  title,
+  body,
+  url,
+  tag,
+}: {
+  excludePlayerName: string;
+  title: string;
+  body: string;
+  url: string;
+  tag?: string;
+}): Promise<void> {
+  if (!vapidPublicKey || !vapidPrivateKey || !vapidSubject) return;
+
+  const { data: subscriptions } = await supabase
+    .from("push_subscriptions")
+    .select("id, endpoint, p256dh, auth, player_name")
+    .neq("player_name", excludePlayerName);
+
+  if (!subscriptions || subscriptions.length === 0) return;
+
+  const payload = JSON.stringify({ title, body, url, tag });
+
+  await Promise.all(
+    subscriptions.map(async (sub) => {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          payload
+        );
+      } catch (err) {
+        const statusCode = (err as { statusCode?: number }).statusCode;
+        if (statusCode === 404 || statusCode === 410) {
+          // Subscription is gone (browser data cleared, uninstalled, etc).
+          await supabase.from("push_subscriptions").delete().eq("id", sub.id);
+        }
+      }
+    })
+  );
+}
+
+export async function saveSubscription(
+  subscription: PushSubscriptionJSON,
+  playerName: string
+): Promise<void> {
+  const name = playerName.trim();
+  if (!name || !subscription.endpoint) return;
+
+  await supabase.from("push_subscriptions").upsert(
+    {
+      player_name: name,
+      endpoint: subscription.endpoint,
+      p256dh: subscription.keys.p256dh,
+      auth: subscription.keys.auth,
+    },
+    { onConflict: "endpoint" }
+  );
+}
+
+export async function deleteSubscription(endpoint: string): Promise<void> {
+  if (!endpoint) return;
+  await supabase.from("push_subscriptions").delete().eq("endpoint", endpoint);
+}
 
 export type SubmitScoreState = {
   error: string | null;
@@ -82,6 +157,14 @@ export async function submitScore(
   revalidatePath("/stats");
   revalidatePath("/history");
 
+  await notifySubscribers({
+    excludePlayerName: playerName,
+    title: dailyBest ? "🏆 Dagens beste resultat!" : "Nytt resultat lagt inn",
+    body: `${playerName} scoret ${parsed.totalScore}/${parsed.totalMax} på runde #${parsed.puzzleNumber}`,
+    url: "/",
+    tag: `score-${parsed.puzzleNumber}`,
+  });
+
   return { error: null, success: true, personalBest, dailyBest };
 }
 
@@ -123,6 +206,14 @@ export async function postComment(
   }
 
   revalidatePath(path);
+
+  await notifySubscribers({
+    excludePlayerName: playerName,
+    title: "💬 Ny melding",
+    body: `${playerName}: ${message}`,
+    url: path,
+    tag: `comment-${puzzleNumber}`,
+  });
 
   return { error: null, success: true };
 }

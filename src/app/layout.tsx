@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fredoka } from "next/font/google";
 import Link from "next/link";
+import { NotificationsBell } from "@/components/NotificationsBell";
 import "./globals.css";
 
 const fredoka = Fredoka({
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="no" className={`${fredoka.variable} h-full antialiased`}>
       <body className="bg-app-gradient flex min-h-full flex-col text-ink">
+        <NotificationsBell />
         <div className="flex-1 pb-24">{children}</div>
         <nav className="fixed inset-x-0 bottom-0 border-t border-peach-dark bg-cream/95 backdrop-blur">
           <div className="mx-auto flex max-w-md items-center justify-between px-4 py-2">

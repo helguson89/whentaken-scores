@@ -21,6 +21,15 @@ export default async function HomePage() {
         <p className="text-ink-light">
           Vær den første til å legge inn dagens WhenTaken-resultat.
         </p>
+        <a
+          href="https://whentaken.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="card flex items-center justify-between px-4 py-3 hover:bg-peach"
+        >
+          <span className="font-semibold">🎮 Spill dagens WhenTaken</span>
+          <span className="text-ink-light">→</span>
+        </a>
         <Link
           href="/add"
           className="inline-block rounded-full bg-coral px-5 py-2.5 font-semibold text-white shadow-sm"
@@ -69,6 +78,16 @@ export default async function HomePage() {
         </h1>
         <p className="text-sm text-ink-light">{latestRow.puzzle_date}</p>
       </div>
+
+      <a
+        href="https://whentaken.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="card flex items-center justify-between px-4 py-3 hover:bg-peach"
+      >
+        <span className="font-semibold">🎮 Spill dagens WhenTaken</span>
+        <span className="text-ink-light">→</span>
+      </a>
 
       <div className="space-y-2">
         {scores.map((score, i) => (
