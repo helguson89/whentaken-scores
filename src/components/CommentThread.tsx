@@ -3,18 +3,37 @@
 import { useActionState, useEffect, useState } from "react";
 import { postComment, type PostCommentState } from "@/lib/actions";
 import { usePlayerName } from "@/lib/usePlayerName";
+import { splitMentions } from "@/lib/mentions";
 import type { CommentRow } from "@/lib/types";
 
 const initialState: PostCommentState = { error: null, success: false };
+
+function MessageText({ message }: { message: string }) {
+  return (
+    <>
+      {splitMentions(message).map((part, i) =>
+        part.isMention ? (
+          <span key={i} className="font-semibold text-coral">
+            {part.text}
+          </span>
+        ) : (
+          <span key={i}>{part.text}</span>
+        )
+      )}
+    </>
+  );
+}
 
 export function CommentThread({
   puzzleNumber,
   comments,
   path,
+  players,
 }: {
   puzzleNumber: number;
   comments: CommentRow[];
   path: string;
+  players?: string[];
 }) {
   const [state, formAction, pending] = useActionState(postComment, initialState);
   const [playerName, setPlayerName] = usePlayerName();
@@ -37,10 +56,27 @@ export function CommentThread({
         {comments.map((c) => (
           <div key={c.id} className="rounded-xl bg-peach px-3 py-2 text-sm">
             <span className="font-semibold">{c.player_name}: </span>
-            <span>{c.message}</span>
+            <MessageText message={c.message} />
           </div>
         ))}
       </div>
+
+      {players && players.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {players.map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() =>
+                setMessage((prev) => (prev.endsWith(" ") || !prev ? prev : `${prev} `) + `@${p} `)
+              }
+              className="rounded-full bg-peach px-2.5 py-1 text-xs font-medium text-ink-light hover:bg-peach-dark hover:text-ink"
+            >
+              @{p}
+            </button>
+          ))}
+        </div>
+      )}
 
       <form action={formAction} className="flex flex-wrap gap-2">
         <input type="hidden" name="puzzleNumber" value={puzzleNumber} />

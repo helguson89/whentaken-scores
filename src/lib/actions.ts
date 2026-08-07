@@ -5,6 +5,7 @@ import webpush from "web-push";
 import { supabase } from "./supabaseClient";
 import { parseWhenTakenShare } from "./parseShare";
 import type { PushSubscriptionJSON } from "./types";
+import { extractMentions, mentionsPlayer } from "./mentions";
 
 const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
@@ -20,12 +21,18 @@ async function notifySubscribers({
   body,
   url,
   tag,
+  mentions,
+  mentionTitle,
+  mentionBody,
 }: {
   excludePlayerName: string;
   title: string;
   body: string;
   url: string;
   tag?: string;
+  mentions?: string[];
+  mentionTitle?: string;
+  mentionBody?: string;
 }): Promise<void> {
   if (!vapidPublicKey || !vapidPrivateKey || !vapidSubject) return;
 
@@ -36,10 +43,18 @@ async function notifySubscribers({
 
   if (!subscriptions || subscriptions.length === 0) return;
 
-  const payload = JSON.stringify({ title, body, url, tag });
+  const defaultPayload = JSON.stringify({ title, body, url, tag });
+  const mentionPayload =
+    mentions && mentions.length > 0 && mentionTitle && mentionBody
+      ? JSON.stringify({ title: mentionTitle, body: mentionBody, url, tag })
+      : null;
 
   await Promise.all(
     subscriptions.map(async (sub) => {
+      const payload =
+        mentionPayload && mentions && mentionsPlayer(mentions, sub.player_name)
+          ? mentionPayload
+          : defaultPayload;
       try {
         await webpush.sendNotification(
           { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
@@ -207,12 +222,17 @@ export async function postComment(
 
   revalidatePath(path);
 
+  const mentions = extractMentions(message);
+
   await notifySubscribers({
     excludePlayerName: playerName,
     title: "💬 Ny melding",
     body: `${playerName}: ${message}`,
     url: path,
     tag: `comment-${puzzleNumber}`,
+    mentions,
+    mentionTitle: `🔔 ${playerName} nevnte deg`,
+    mentionBody: message,
   });
 
   return { error: null, success: true };

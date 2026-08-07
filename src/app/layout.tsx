@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fredoka } from "next/font/google";
 import Link from "next/link";
 import { NotificationsBell } from "@/components/NotificationsBell";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import "./globals.css";
 
 const fredoka = Fredoka({
@@ -13,6 +14,23 @@ const fredoka = Fredoka({
 export const metadata: Metadata = {
   title: "WhenTaken Scores",
   description: "Del og sammenlign WhenTaken-resultater med venner",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "WT Scores",
+  },
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f4805a",
 };
 
 const NAV_LINKS = [
@@ -27,6 +45,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="no" className={`${fredoka.variable} h-full antialiased`}>
       <body className="bg-app-gradient flex min-h-full flex-col text-ink">
         <NotificationsBell />
+        <InstallPrompt />
         <div className="flex-1 pb-24">{children}</div>
         <nav className="fixed inset-x-0 bottom-0 border-t border-peach-dark bg-cream/95 backdrop-blur">
           <div className="mx-auto flex max-w-md items-center justify-between px-4 py-2">

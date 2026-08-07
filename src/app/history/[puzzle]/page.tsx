@@ -73,6 +73,7 @@ export default async function PuzzleHistoryPage({
         puzzleNumber={puzzleNumber}
         comments={(comments ?? []) as CommentRow[]}
         path={path}
+        players={scores.map((s) => s.player_name)}
       />
     </main>
   );

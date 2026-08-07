@@ -10,7 +10,9 @@ Del og sammenlign daglige [WhenTaken](https://whentaken.com/)-resultater med ven
 - **Historikk** — se alle tidligere runder og resultatene for hver av dem, med egen kommentartråd per runde
 - **Utvid en score** — trykk på et resultat for å se poengene per spørsmål (avstand, år, medalje), og reager med emoji på andres resultater
 - **Push-varsler** — skru på 🔔 øverst til høyre for å få varsel på telefonen/PC-en når noen legger inn et resultat eller skriver i chatten
+- **@nevn i chat** — nevn noen med `@Navn` for å sende dem et eget "du ble nevnt"-varsel; trykk på et navn under meldingsfeltet for å sette inn nevningen
 - **Lenke til dagens runde** — knapp øverst på "I dag"- og "Legg til"-sidene som åpner whentaken.com i ny fane
+- **Installerbar app (PWA)** — installer appen på hjemskjermen fra bannernet som dukker opp (eller via nettleserens "Legg til på Hjem-skjerm") for rask tilgang og eget app-ikon
 
 Det er **ingen innlogging eller grupper** — alle med lenken til appen deler samme leaderboard og kan legge inn resultat under hvilket som helst navn. Dette er en bevisst forenkling for en liten vennegjeng; se sikkerhetsnotatet nederst hvis dere vokser ut av det.
 

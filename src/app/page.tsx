@@ -112,6 +112,7 @@ export default async function HomePage() {
         puzzleNumber={puzzleNumber}
         comments={(comments ?? []) as CommentRow[]}
         path="/"
+        players={scores.map((s) => s.player_name)}
       />
     </main>
   );
