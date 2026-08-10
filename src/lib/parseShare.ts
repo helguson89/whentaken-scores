@@ -45,8 +45,16 @@ export function parseWhenTakenShare(input: string): ParsedShare | null {
   if (!totalMatch) return null;
   const [, totalScoreStr, totalMaxStr] = totalMatch;
 
+  // The leading round-number keycap (1️⃣, 2️⃣, ...) is a multi-codepoint emoji
+  // sequence (digit + variation selector + combining enclosing keycap) that
+  // some keyboards/clipboards mangle or strip on copy — dropping the
+  // variation selector for just one round, which silently made that round's
+  // line fail to match while the others (and the total score, parsed
+  // separately) still parsed fine. We don't actually need the number itself
+  // since `roundIndex` below is derived from match order, so anchor on the
+  // 📍 pin emoji instead and tolerate a missing/variant calendar selector too.
   const roundLineRegex =
-    /(?:\d️⃣|[1-5]️⃣)\s*📍\s*([^-]+?)\s*-\s*🗓️\s*(\d+)\s*yrs?\s*-\s*(🥇|🥈|🥉)?\s*(\d+)\s*\/\s*(\d+)/gu;
+    /📍\s*([^-\n]+?)\s*-\s*🗓️?\s*(\d+)\s*yrs?\s*-\s*(🥇|🥈|🥉)?\s*(\d+)\s*\/\s*(\d+)/gu;
 
   const rounds: ParsedRound[] = [];
   let match: RegExpExecArray | null;

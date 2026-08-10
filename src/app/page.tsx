@@ -21,10 +21,10 @@ export default async function HomePage() {
         <p className="text-ink-light">
           Vær den første til å legge inn dagens WhenTaken-resultat.
         </p>
+        {/* Same-tab navigation on purpose — see the comment on the other
+            whentaken.com link below. */}
         <a
           href="https://whentaken.com/"
-          target="_blank"
-          rel="noopener noreferrer"
           className="card flex items-center justify-between px-4 py-3 hover:bg-peach"
         >
           <span className="font-semibold">🎮 Spill dagens WhenTaken</span>
@@ -79,10 +79,15 @@ export default async function HomePage() {
         <p className="text-sm text-ink-light">{latestRow.puzzle_date}</p>
       </div>
 
+      {/*
+        Deliberately no target="_blank" here: in an installed/standalone PWA,
+        opening an external link in a new tab launches a separate browser
+        app instance, so closing it lands on the home screen instead of back
+        in this app. Navigating in the same tab keeps it in this window's
+        history, so the device's normal back gesture/button returns here.
+      */}
       <a
         href="https://whentaken.com/"
-        target="_blank"
-        rel="noopener noreferrer"
         className="card flex items-center justify-between px-4 py-3 hover:bg-peach"
       >
         <span className="font-semibold">🎮 Spill dagens WhenTaken</span>

@@ -5,6 +5,7 @@ import confetti from "canvas-confetti";
 import { submitScore, type SubmitScoreState } from "@/lib/actions";
 import { parseWhenTakenShare } from "@/lib/parseShare";
 import { usePlayerName } from "@/lib/usePlayerName";
+import { medalEmoji } from "@/lib/medal";
 
 const initialState: SubmitScoreState = {
   error: null,
@@ -80,10 +81,15 @@ export default function AddScorePage() {
     <main className="mx-auto max-w-md space-y-4 p-4">
       <h1 className="text-xl font-semibold">Legg til dagens resultat</h1>
 
+      {/*
+        Deliberately no target="_blank" here: in an installed/standalone PWA,
+        opening an external link in a new tab launches a separate browser
+        app instance, so closing it lands on the home screen instead of back
+        in this app. Navigating in the same tab keeps it in this window's
+        history, so the device's normal back gesture/button returns here.
+      */}
       <a
         href="https://whentaken.com/"
-        target="_blank"
-        rel="noopener noreferrer"
         className="card flex items-center justify-between px-4 py-3 hover:bg-peach"
       >
         <span className="font-semibold">🎮 Spill dagens WhenTaken</span>
@@ -135,7 +141,7 @@ export default function AddScorePage() {
         )}
 
         {preview && (
-          <div className="space-y-1 rounded-2xl bg-peach px-3 py-2 text-sm">
+          <div className="space-y-2 rounded-2xl bg-peach px-3 py-2 text-sm">
             <p className="font-semibold text-ink">Forhåndsvisning</p>
             <p>
               Runde #{preview.puzzleNumber} · {preview.date}
@@ -143,6 +149,21 @@ export default function AddScorePage() {
             <p>
               Score: {preview.totalScore}/{preview.totalMax}
             </p>
+            <div className="space-y-1.5">
+              {preview.rounds.map((round) => (
+                <div
+                  key={round.round}
+                  className="flex flex-wrap items-center justify-between gap-1 rounded-xl bg-cream px-3 py-1.5"
+                >
+                  <span className="font-medium">#{round.round}</span>
+                  <span>📍 {round.distanceText}</span>
+                  <span>🗓️ {round.yearDiff} år</span>
+                  <span className="font-semibold">
+                    {medalEmoji(round.medal)} {round.score}/{round.maxScore}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

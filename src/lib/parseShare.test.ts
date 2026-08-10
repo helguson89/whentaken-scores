@@ -57,4 +57,30 @@ describe("parseWhenTakenShare", () => {
   it("returns null for garbage input", () => {
     expect(parseWhenTakenShare("not a share text")).toBeNull();
   });
+
+  it("still parses a round when its keycap number is missing the variation selector", () => {
+    // Some keyboards/clipboards strip the invisible U+FE0F variation selector
+    // from the "N️⃣" keycap emoji on copy, leaving just digit + U+20E3. The
+    // round itself should still be counted since we anchor on the 📍 pin.
+    const mangled = SAMPLE.replace("3️⃣📍8.0K km", "3⃣📍8.0K km");
+    const result = parseWhenTakenShare(mangled)!;
+    expect(result.rounds).toHaveLength(5);
+    expect(result.rounds[2]).toMatchObject({
+      distanceText: "8.0K km",
+      medal: "bronze",
+    });
+  });
+
+  it("still parses a round when the calendar emoji is missing its variation selector", () => {
+    const mangled = SAMPLE.replace("🗓️9 yrs", "🗓9 yrs");
+    const result = parseWhenTakenShare(mangled)!;
+    expect(result.rounds).toHaveLength(5);
+    expect(result.rounds[0]).toMatchObject({ yearDiff: 9 });
+  });
+
+  it("still parses a round with no leading number emoji at all", () => {
+    const mangled = SAMPLE.replace("1️⃣📍744 km", "📍744 km");
+    const result = parseWhenTakenShare(mangled)!;
+    expect(result.rounds).toHaveLength(5);
+  });
 });

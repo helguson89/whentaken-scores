@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { toggleReaction } from "@/lib/actions";
 import { usePlayerName } from "@/lib/usePlayerName";
+import { medalEmoji } from "@/lib/medal";
 import { REACTION_EMOJIS, type ReactionRow, type ScoreRow } from "@/lib/types";
 
 function medalFor(position: number): string {
@@ -10,13 +11,6 @@ function medalFor(position: number): string {
   if (position === 1) return "🥈";
   if (position === 2) return "🥉";
   return `${position + 1}.`;
-}
-
-function roundMedal(medal: "gold" | "silver" | "bronze" | null): string {
-  if (medal === "gold") return "🥇";
-  if (medal === "silver") return "🥈";
-  if (medal === "bronze") return "🥉";
-  return "";
 }
 
 export function ScoreCard({
@@ -79,7 +73,7 @@ export function ScoreCard({
               <span>📍 {round.distanceText}</span>
               <span>🗓️ {round.yearDiff} år</span>
               <span className="font-semibold">
-                {roundMedal(round.medal)} {round.score}/{round.maxScore}
+                {medalEmoji(round.medal)} {round.score}/{round.maxScore}
               </span>
             </div>
           ))}
