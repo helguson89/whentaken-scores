@@ -83,4 +83,29 @@ describe("parseWhenTakenShare", () => {
     const result = parseWhenTakenShare(mangled)!;
     expect(result.rounds).toHaveLength(5);
   });
+
+  it("still parses a round when the dash is an en dash or em dash instead of a hyphen", () => {
+    // Some devices substitute typographic dashes for "-" on copy/paste,
+    // which broke the old "capture everything up to the next hyphen"
+    // distance matcher for just that one round.
+    const mangled = SAMPLE.replace(
+      "4️⃣📍611 km - 🗓️8 yrs - 🥈171/200",
+      "4️⃣📍611 km – 🗓️8 yrs — 🥈171/200"
+    );
+    const result = parseWhenTakenShare(mangled)!;
+    expect(result.rounds).toHaveLength(5);
+    expect(result.rounds[3]).toMatchObject({
+      distanceText: "611 km",
+      yearDiff: 8,
+      medal: "silver",
+      score: 171,
+      maxScore: 200,
+    });
+  });
+
+  it("parses distances case-insensitively", () => {
+    const mangled = SAMPLE.replace("611 km", "611 KM");
+    const result = parseWhenTakenShare(mangled)!;
+    expect(result.rounds).toHaveLength(5);
+  });
 });

@@ -6,6 +6,7 @@ import { submitScore, type SubmitScoreState } from "@/lib/actions";
 import { parseWhenTakenShare } from "@/lib/parseShare";
 import { usePlayerName } from "@/lib/usePlayerName";
 import { medalEmoji } from "@/lib/medal";
+import { PlayWhenTakenLink } from "@/components/PlayWhenTakenLink";
 
 const initialState: SubmitScoreState = {
   error: null,
@@ -81,20 +82,7 @@ export default function AddScorePage() {
     <main className="mx-auto max-w-md space-y-4 p-4">
       <h1 className="text-xl font-semibold">Legg til dagens resultat</h1>
 
-      {/*
-        Deliberately no target="_blank" here: in an installed/standalone PWA,
-        opening an external link in a new tab launches a separate browser
-        app instance, so closing it lands on the home screen instead of back
-        in this app. Navigating in the same tab keeps it in this window's
-        history, so the device's normal back gesture/button returns here.
-      */}
-      <a
-        href="https://whentaken.com/"
-        className="card flex items-center justify-between px-4 py-3 hover:bg-peach"
-      >
-        <span className="font-semibold">🎮 Spill dagens WhenTaken</span>
-        <span className="text-ink-light">→</span>
-      </a>
+      <PlayWhenTakenLink />
 
       <form action={formAction} className="card space-y-4 p-4">
         <div>

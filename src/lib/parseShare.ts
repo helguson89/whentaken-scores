@@ -45,16 +45,27 @@ export function parseWhenTakenShare(input: string): ParsedShare | null {
   if (!totalMatch) return null;
   const [, totalScoreStr, totalMaxStr] = totalMatch;
 
-  // The leading round-number keycap (1️⃣, 2️⃣, ...) is a multi-codepoint emoji
-  // sequence (digit + variation selector + combining enclosing keycap) that
-  // some keyboards/clipboards mangle or strip on copy — dropping the
-  // variation selector for just one round, which silently made that round's
-  // line fail to match while the others (and the total score, parsed
-  // separately) still parsed fine. We don't actually need the number itself
-  // since `roundIndex` below is derived from match order, so anchor on the
-  // 📍 pin emoji instead and tolerate a missing/variant calendar selector too.
-  const roundLineRegex =
-    /📍\s*([^-\n]+?)\s*-\s*🗓️?\s*(\d+)\s*yrs?\s*-\s*(🥇|🥈|🥉)?\s*(\d+)\s*\/\s*(\d+)/gu;
+  // Rounds silently went missing from the breakdown for some players even
+  // though the total score (parsed separately, above) was always right —
+  // one round's line just failed to match while the others still did. Two
+  // things made the match fragile:
+  //  1. The leading round-number keycap (1️⃣, 2️⃣, ...) and the calendar
+  //     emoji (🗓️) are multi-codepoint sequences (base + variation
+  //     selector [+ combining enclosing keycap]) that some keyboards/
+  //     clipboards mangle or strip on copy, losing just the selector.
+  //  2. The distance was captured as "everything up to the next hyphen",
+  //     and depended on that hyphen being a plain ASCII "-" — but some
+  //     devices substitute an en dash (–) or em dash (—) for it on copy.
+  // We don't need the round number at all (roundIndex below comes from
+  // match order), so this anchors on the 📍 pin emoji, matches the distance
+  // as an explicit number+unit token instead of "until the next dash", and
+  // accepts any dash-like separator and a missing/variant calendar selector.
+  const DISTANCE = "[\\d.,]+\\s*K?\\s*(?:km|m)";
+  const DASH = "[-‐-―−]";
+  const roundLineRegex = new RegExp(
+    `📍\\s*(${DISTANCE})\\s*${DASH}\\s*🗓\\uFE0F?\\s*(\\d+)\\s*yrs?\\s*${DASH}\\s*(🥇|🥈|🥉)?\\s*(\\d+)\\s*/\\s*(\\d+)`,
+    "giu"
+  );
 
   const rounds: ParsedRound[] = [];
   let match: RegExpExecArray | null;
